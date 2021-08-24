@@ -19,7 +19,7 @@ gender_age = data.groupby(["gender","age_class"]).size().unstack()
 print(gender_age)
 gender_age.plot(kind = 'bar', stacked = True)
 plt.xticks(rotation = 0)
-plt.savefig("figure1")
+plt.savefig("team_github/image-classification-level1-20/T2236/figure1")
 print()
 
 # figure 2
@@ -27,7 +27,7 @@ gender_age = data.groupby(["age_class","gender"]).size().unstack()
 print(gender_age)
 gender_age.plot(kind = 'bar', stacked = True)
 plt.xticks(rotation = 0)
-plt.savefig("figure2")
+plt.savefig("team_github/image-classification-level1-20/T2236/figure2")
 print()
 
 
