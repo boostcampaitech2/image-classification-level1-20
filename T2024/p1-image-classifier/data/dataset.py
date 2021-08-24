@@ -31,4 +31,4 @@ class Custom_Dataset(Dataset):
         X, y = self.X[index], self.y[index]
         if self.transform:
             X = self.transform(X)
-        return torch.tensor(X, dtype=torch.double), torch.tensor(y, dtype=torch.long)
+        return X, torch.tensor(y, dtype=torch.long)
