@@ -7,7 +7,7 @@ import matplotlib.font_manager as fm
 data = pd.read_csv('./input/data/train/train.csv')
 data.describe(include = 'all')
 
-## data age classes
+## data age class
 bins = [0,30,60,80]
 bins_label = ["< 30","30 <= age < 60","60 <="]
 data["age_class"] = pd.cut(data.age, bins, right = False, labels = bins_label, include_lowest = True)
