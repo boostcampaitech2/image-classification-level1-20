@@ -1,0 +1,1 @@
+{"argument": {"epochs": 3}, "data_loader": {"type": "MaskDataset", "args": {"batch_size": 32, "shuffle": true, "num_workers": 2}}, "model": {"type": "Resnet18"}, "optimizer": {"type": "Adam", "args": {"lr": 0.0001, "weight_decay": 0, "amsgrad": true}}, "crit": "CrossEntropyLoss", "lr_scheduler": {"type": "StepLR", "args": {"step_size": 50, "gamma": 0.1}}}
