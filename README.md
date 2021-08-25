@@ -8,5 +8,5 @@ image-classification-level1-20 created by GitHub Classroom
 * 김재영_T2049	
 * 김정현_T2051	: mawjdgus
 * 박진한_T2097	
-* 최태종_T2232	
+* 최태종_T2232 : ssail09
 * 한재현_T2236 : eric9687
