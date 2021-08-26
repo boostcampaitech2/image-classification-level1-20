@@ -6,6 +6,10 @@ P_Stage 공유자료 올려놓으면 좋을 것 같아요
 ['21.08.24] Labeling_train.ipynb, resnet_base.ipynb. train.json updated. </br>
 ['21.08.25] To_csv_for_dataset.py, train.csv updated
 
+~~['21.08.26] classificate updated~~
+
+['21.08.27] classificate updated 
+
 # Explanation for each code
 
 [**Labeling_train.ipynb**](https://github.com/boostcampaitech2/image-classification-level1-20/blob/main/P_Stage/Labeling_train.ipynb)
@@ -23,4 +27,6 @@ Pre-trained된 ResNet18 Model로 학습하고, 이에 따른 학습결과로 sub
 - 같은 작업을 수행한 json파일이 있지만, 일부 확장자 문제(png, jpeg)와 csv 사용이 친숙한 경우가 있기 때문에 제공합니다.
 - 관련 자료 : [train.csv](https://github.com/boostcampaitech2/image-classification-level1-20/blob/main/P_Stage/train.csv)
 
+[**classification.py**](https://github.com/boostcampaitech2/image-classification-level1-20/blob/main/P_Stage/classificate.py)
 
+각 사진을 마스크, 성별, 나이로 폴더를 만들고 그 안에 적용시켜줌, 3, 2, 3 클래스로 구분되며 세부적인 클래스 분류하는 분류기 만들기에 적합
