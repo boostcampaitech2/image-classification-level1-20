@@ -37,7 +37,7 @@ for list in os.listdir(path_dir):
                 incorrect_mask_list.append(path_list_dir + '/' + name)
 
 for file in incorrect_mask_list:
-    shutil.copy(file, './incorrect_mask/' + file[18:].replace('/','_'))
+    shutil.copy(file, './incorrect/' + file[18:].replace('/','_'))
     
 
 #-----------------normal--------------------#
@@ -60,7 +60,7 @@ for list in os.listdir(path_dir):
     if list[0] != '.':
         path_list_dir = path_dir + list
         for name in os.listdir(path_dir + list):
-            if name[0] != '.' and 'mask' in name:
+            if name[0] != '.' and 'mask' in name and 'incorrect' not in name:
                 mask_list.append(path_list_dir + '/' + name)
 
 for file in mask_list:
@@ -87,7 +87,7 @@ for list in os.listdir(path_dir):
     if list[0] != '.':
         path_list_dir = path_dir + list
         for name in os.listdir(path_dir + list):
-            if 'male' in path_list_dir and name[0] != '.':
+            if '_male' in path_list_dir and name[0] != '.':
                 male_list.append(path_list_dir + '/' + name)
 
 
