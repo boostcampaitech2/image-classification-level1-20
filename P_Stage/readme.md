@@ -5,9 +5,7 @@ P_Stage 공유자료 올려놓으면 좋을 것 같아요
 
 ['21.08.24] Labeling_train.ipynb, resnet_base.ipynb. train.json updated. </br>
 ['21.08.25] To_csv_for_dataset.py, train.csv updated
-
-~~['21.08.26] classificate updated ~~
-
+~~['21.08.26] classificate updated~~
 ['21.08.27] classificate updated 
 
 # Explanation for each code
