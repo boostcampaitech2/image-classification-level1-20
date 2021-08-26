@@ -20,3 +20,5 @@
     Resnet34(pretrained) -> ongoing
 
 * 김재영
+    Resnext50(pretrained) epoch: 3, batch_size:128, lr: 0.005 을 이용해서 마스크, 성별, 나이 각각 학습
+    Linear(8, 18) epoch: 5, batch_size:128, lr:0.005을 이용해서 18가지 클래스에 대해 분류 -> acc: 73%	f1: 0.6454
