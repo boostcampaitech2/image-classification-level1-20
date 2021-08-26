@@ -1,4 +1,4 @@
-##Model List
+## Model List
 
 * 한재현
     DenseNet121 (NUM_EPOCH = 10, BATCH_SIZE = 50, LEARNING_RATE = 0.001)
