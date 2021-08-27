@@ -15,7 +15,18 @@
 * 김민성
     - vit_tiny_patch16_224
         - epoch=30, batch_size=32, learning_rate=0.002, cross_entropy, adam
-        - accuracy : 47%, f1_score : 0.3879
+            - train
+                - ...모르고 지워버림
+            - submission
+                - accuracy : 0.47, f1_score : 0.3879
+        - epoch=30, batch_size=32, learning_rate=0.002, f1_loss+cross_entropy, adam
+            - train
+                - accuracy : 0.271, f1_score : 0.1067
+        - epoch=50, batch_size=32, learning_rate=0.002, f1_loss * 0.8 + cross_entropy * 0.2, adam
+            - train
+                - best accuracy : 0.939, f1_score : 0.893
+            - submission
+                - accuracy : 0.433, f1_score : 0.3717
     
 
 * 김정현
