@@ -11,6 +11,10 @@
     EfficientNetb3 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : Epoch30 - Loss: 0.018, Acc: 0.994, F1: 0.9892
     -> 제출 결과- ACC: 74.9841%	F1: 0.6824
+    
+    EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    
+    -> 제출 결과- ACC: 73.6349%	F1: 0.6371   (ㅠㅡㅠ)
 
 * 김민성
     - vit_tiny_patch16_224
