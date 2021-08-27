@@ -9,7 +9,8 @@
     -> 리더보드 제출 결과: 42%.....(띠로리..)
     
     EfficientNetb3 (NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
-    : 학습중..
+    : Epoch30 - Loss: 0.018, Acc: 0.994, F1: 0.9892
+    -> 제출 결과- ACC: 74.9841%	F1: 0.6824
 
 * 김민성
     - vit_tiny_patch16_224
