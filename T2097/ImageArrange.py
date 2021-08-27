@@ -64,6 +64,7 @@ class ImageArrange:
         """
         path_in의 image를 path_out의 class 폴더로 분류
         확장자는 .jpg로 통일
+        image의 이름은 num_mask_gender_age.jpg의 형식을 따름. (_get_file_name 참고)
 
         Args:
             path_in: 제공받은 train.tar/train/images의 디렉토리
