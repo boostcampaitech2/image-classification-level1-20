@@ -37,7 +37,13 @@
 
     Resnet18(pretrained) -> best result : epoch20, train loss : 0.02, f1 : 0.91 **submission** : acc :0.73 f1 : 0.66
 
-    Resnet34(pretrained) -> ongoing
+    Resnet18(pretrained)_gender -> best result : epoch1 , train loss =0.03, f1 : 0.03 no submission label [ 0 , 1 ]
+    Resnet18(pretrained)_age -> ongoing
+    Resnet18(pretrained)_mask -> ongoing
+    
+    Resnet34(pretrained) -> best result : epoch50, train loss : 0.01 f1 : 0.93 **submission** : acc : 0.74 f1: 0.64
+    
+    
 
 * 김재영  
 
