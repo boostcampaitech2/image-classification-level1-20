@@ -1,22 +1,23 @@
 ## Model List
 
 * 한재현
-    DenseNet121 (pretrained, NUM_EPOCH = 10, BATCH_SIZE = 50, LEARNING_RATE = 0.001)
+
+    - DenseNet121 (pretrained, NUM_EPOCH = 10, BATCH_SIZE = 50, LEARNING_RATE = 0.001)
     : 별로..
     
-    EfficientNetb3 (pretrained, NUM_EPOCH = 10, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    - EfficientNetb3 (pretrained, NUM_EPOCH = 10, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : Epoch10 - Loss: 0.333, Acc: 0.881, F1: 0.7778   
     -> 리더보드 제출 결과: 42%.....(띠로리..)
     
-    EfficientNetb3 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    - EfficientNetb3 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : Epoch30 - Loss: 0.018, Acc: 0.994, F1: 0.9892
     -> 제출 결과- ACC: 74.9841%	F1: 0.6824
     
-    EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    - EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     
     -> 제출 결과- ACC: 73.6349%	F1: 0.6371   (ㅠㅡㅠ)
 
-    EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 25, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    - EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 25, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : crop범위를 조금 확장하고, 데이터의 인중부터 입술 부분 cutout
     Epoch10 - Loss: 0.026, Acc: 0.992, F1: 0.9830
     -> 제출 결과- ACC: 74.1905% F1: 0.6824  
