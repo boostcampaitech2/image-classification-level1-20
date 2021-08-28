@@ -16,12 +16,12 @@ import torch.optim as optim
 
 from torchvision import transforms
 from torchvision import models
-from torchvision.transforms import Resize, ToTensor, Normalize,RandomHorizontalFlip
+from torchvision.transforms import Resize, ToTensor,RandomErasing, Normalize,RandomHorizontalFlip, ColorJitter
 import matplotlib.pyplot as plt
 
 from data_set import TrainDataset
 
-NUM_EPOCH = 10
+NUM_EPOCH = 30
 BATCH_SIZE = 32
 LEARNING_RATE =  0.002
 phase = "train"
@@ -44,6 +44,9 @@ data_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
 transform = transforms.Compose([
     Resize((512, 384), Image.BILINEAR),
     ToTensor(),
+    transforms.RandomErasing(),
+    ColorJitter(contrast=(0.1),saturation=(0.2),hue = 0.1),
+    RandomErasing(p=0.2, scale=(0.001, 0.005)),
     RandomHorizontalFlip(0.5),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
 ])
@@ -179,7 +182,7 @@ for images in loader:
 submission['ans'] = all_predictions
 
 # 제출할 파일을 저장합니다.
-submission.to_csv(os.path.join(test_dir, 'submission_new_eff_8_28_eph10.csv'), index=False)
+submission.to_csv(os.path.join(test_dir, 'submission_new_eff_8_28_eph30.csv'), index=False)
 print('test inference is done!')
 
 
