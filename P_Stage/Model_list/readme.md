@@ -16,6 +16,10 @@
     
     -> 제출 결과- ACC: 73.6349%	F1: 0.6371   (ㅠㅡㅠ)
 
+    EfficientNetb3 + MCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 25, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
+    : crop범위를 조금 확장하고, 데이터의 인중부터 입술 부분 cutout
+    Epoch10 - Loss: 0.026, Acc: 0.992, F1: 0.9830
+    -> 제출 결과- ACC: 74.1905% F1: 0.6824  
 * 김민성
     - vit_tiny_patch16_224
         - epoch=30, batch_size=32, learning_rate=0.002, cross_entropy, adam

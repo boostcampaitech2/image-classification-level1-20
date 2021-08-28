@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 from data_set import TrainDataset
 
-NUM_EPOCH = 30
+NUM_EPOCH = 10
 BATCH_SIZE = 32
 LEARNING_RATE =  0.002
 phase = "train"
@@ -40,7 +40,7 @@ def seed_everything(seed: int = 42):
 
 
 # Dataset
-data_df = pd.read_csv("/opt/ml/train_data_path_and_class.csv")
+data_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
 transform = transforms.Compose([
     Resize((512, 384), Image.BILINEAR),
     ToTensor(),
@@ -124,7 +124,7 @@ print("Train Finished!")
 # for var_name in optimizer.state_dict():
 #     print(var_name, "\t", optimizer.state_dict()[var_name])
 
-PATH = model_arch +"model_saved.pt"
+PATH = model_arch +"model_saved_new_eff.pt"
 torch.save({'epoch': NUM_EPOCH,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
@@ -149,7 +149,7 @@ class TestDataset(Dataset):
 
 test_dir = '/opt/ml/input/data/eval'
 submission = pd.read_csv(os.path.join(test_dir, 'info.csv'))
-image_dir = os.path.join(test_dir, 'images')
+image_dir = os.path.join(test_dir, 'new_imgs')
 
 # Test Dataset 클래스 객체를 생성하고 DataLoader를 만듭니다.
 image_paths = [os.path.join(image_dir, img_id) for img_id in submission.ImageID]
@@ -179,7 +179,7 @@ for images in loader:
 submission['ans'] = all_predictions
 
 # 제출할 파일을 저장합니다.
-submission.to_csv(os.path.join(test_dir, 'submission_eff.csv'), index=False)
+submission.to_csv(os.path.join(test_dir, 'submission_new_eff_8_28_eph10.csv'), index=False)
 print('test inference is done!')
 
 
