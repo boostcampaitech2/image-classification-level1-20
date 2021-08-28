@@ -19,11 +19,12 @@
 
     - EfficientNetb3 + MTCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 25, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : crop범위를 조금 확장하고, 데이터의 인중부터 입술 부분 cutout
-    Epoch10 - Loss: 0.026, Acc: 0.992, F1: 0.9830
+    Epoch25 - Loss: 0.026, Acc: 0.992, F1: 0.9830
     -> 제출 결과- ACC: 74.1905% F1: 0.6824  
     
     -  EfficientNetb3 + MTCNN을 통한 crop 후 데이터 (pretrained, NUM_EPOCH = 30, BATCH_SIZE = 32, LEARNING_RATE = 0.002) 
     : crop범위를 조금 확장하고, 데이터의 인중부터 입술 부분 cutout
+        Epoch30 - Loss: 0.015, Acc: 0.995, F1: 0.9898
     -> 제출 결과- ACC: 75.6503% F1: 0.6913
 * 김민성
     - vit_tiny_patch16_224
