@@ -16,7 +16,7 @@
   - 적절한 scale_factor를 찾는 것이 중요
 - **to be improved**: 눈을 기준으로 ROI를 찾은 후에, 인체의 비례를 활용하여 얼굴 검출을 해보자.
 
-[**mtcnn_in_collate**](https://github.com/boostcampaitech2/image-classification-level1-20/blob/36de3d5b1216004e532635cb94acef9efe981793/김범찬_T2031/mtcnn_in_collate.ipynb)
+[**mtcnn_in_collate**](https://github.com/boostcampaitech2/image-classification-level1-20/blob/main/%EA%B9%80%EB%B2%94%EC%B0%AC_T2031/mtcnn_in_collate.ipynb)
 
 얼굴 검출을 <code>collate_fn</code> 내에서 실행하도록 하기 위함.
 
