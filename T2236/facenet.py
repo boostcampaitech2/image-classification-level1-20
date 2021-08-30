@@ -57,8 +57,7 @@ for paths in tqdm(os.listdir(img_path)):
             if i >195 and i <225:
                 for j in range(300):
                     img[i][j] = np.array([0,0,0])
-        sharpening = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-        img = cv2.filter2D(img, -1, sharpening)
+        
         tmp = os.path.join(new_img_dir, paths)
         cnt += 1
         plt.imsave(os.path.join(tmp, imgs), img)
@@ -113,8 +112,7 @@ for imgs in tqdm(os.listdir(img_path)):
         if i >195 and i <225:
             for j in range(300):
                 img[i][j] = np.array([0,0,0])
-    sharpening = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-    img = cv2.filter2D(img, -1, sharpening)
+    
     
             
     # tmp = os.path.join(new_img_dir, paths)

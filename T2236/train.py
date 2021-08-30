@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
+from torch.utils.data.sampler import SubsetRandomSampler
 import torch.optim as optim
 
 from torchvision import transforms
@@ -21,12 +22,6 @@ import matplotlib.pyplot as plt
 
 from data_set import TrainDataset
 
-NUM_EPOCH = 30
-BATCH_SIZE = 32
-LEARNING_RATE =  0.002
-phase = "train"
-num_classes= 18
-
 def seed_everything(seed: int = 42):
     random.seed(seed)
     np.random.seed(seed)
@@ -35,42 +30,70 @@ def seed_everything(seed: int = 42):
     torch.cuda.manual_seed(seed)  # type: ignore
     torch.backends.cudnn.deterministic = True  # type: ignore
     torch.backends.cudnn.benchmark = True  
+seed_everything()
+
+
+
+# Parameter
+NUM_EPOCH = 30
+BATCH_SIZE = 32
+LEARNING_RATE =  0.002
+num_classes= 18
+validation_ratio = 0.1
 
 
 
 
 # Dataset
 data_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
-transform = transforms.Compose([
-    Resize((512, 384), Image.BILINEAR),
+train_transform = transforms.Compose([
+    Resize((300,300), Image.BILINEAR),
     ToTensor(),
     transforms.RandomErasing(),
-    ColorJitter(contrast=(0.1),saturation=(0.2),hue = 0.1),
-    RandomErasing(p=0.2, scale=(0.001, 0.005)),
+    ColorJitter(contrast=(0.1),brightness=(0.1),hue = 0.1),
     RandomHorizontalFlip(0.5),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
 ])
-dataset = TrainDataset(data_df,transform)
+valid_transform = transforms.Compose([
+    Resize((300,300), Image.BILINEAR),
+    ToTensor(),
+    Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
+])
+train_dataset = TrainDataset(data_df,train_transform)
+valid_dataset = TrainDataset(data_df,valid_transform)
+
+num_train = len(train_dataset)
+indices = list(range(num_train))
+split = int(np.floor(validation_ratio * num_train))
+
+np.random.shuffle(indices)
+
+train_idx, valid_idx = indices[split:], indices[:split]
+
+train_sampler = SubsetRandomSampler(train_idx)
+valid_sampler = SubsetRandomSampler(valid_idx)
 
 # DataLoader
-loader = DataLoader(
-    dataset,
+train_loader = DataLoader(
+    train_dataset,
     batch_size = BATCH_SIZE,
-    shuffle= True
+    sampler= train_sampler
+)
+valid_loader = DataLoader(
+    valid_dataset,
+    batch_size = BATCH_SIZE,
+    sampler= valid_sampler
 )
 
 
-# Model
-# model = models.densenet121(pretrained=True)
-# num_ftrs = model.classifier.in_features
-# model.classifier = nn.Linear(num_ftrs, num_classes)
 
+# Model
 model_arch = 'efficientnet_b3'
 model =  timm.create_model(model_arch, num_classes = num_classes, pretrained=True)
-
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
+
+
 
 
 # Train
@@ -87,7 +110,7 @@ for epoch in range(NUM_EPOCH):
     model.train()
 	
 		
-    for ind, (images, labels) in enumerate(tqdm.tqdm(loader, leave=False)):
+    for ind, (images, labels) in enumerate(tqdm.tqdm(train_loader, leave=False)):
         
         images = torch.stack(list(images), dim=0).to(device)
         labels = torch.tensor(list(labels)).to(device)
@@ -109,24 +132,28 @@ for epoch in range(NUM_EPOCH):
         n_iter += 1
 
 
-		# 한 epoch이 모두 종료되었을 때,
-    epoch_loss = running_loss / len(loader.dataset)
-    epoch_acc = running_acc / len(loader.dataset)
+	# 한 epoch이 모두 종료되었을 때,
+    epoch_loss = running_loss / len(train_loader.dataset)
+    epoch_acc = running_acc / len(train_loader.dataset)
     epoch_f1 = epoch_f1/n_iter
 
-    print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}")
-print("Train Finished!")
+    # print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}")
+
+    correct = 0
+    total = 0
+    for i, data in enumerate(valid_loader, 0):
+        inputs, labels = data
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs = model(inputs)
+        
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+    print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}, Validation ACC:{correct/total:.3f}")
 
 
-# print("Model's state_dict:")
-# for param_tensor in model.state_dict():
-#     print(param_tensor, "\t", model.state_dict()[param_tensor].size())
-
-# # ### 옵티마이저의 state_dict 출력
-# print("Optimizer's state_dict:")
-# for var_name in optimizer.state_dict():
-#     print(var_name, "\t", optimizer.state_dict()[var_name])
-
+# Model Save
 PATH = model_arch +"model_saved_new_eff.pt"
 torch.save({'epoch': NUM_EPOCH,
             'model_state_dict': model.state_dict(),
@@ -157,7 +184,7 @@ image_dir = os.path.join(test_dir, 'new_imgs')
 # Test Dataset 클래스 객체를 생성하고 DataLoader를 만듭니다.
 image_paths = [os.path.join(image_dir, img_id) for img_id in submission.ImageID]
 transform = transforms.Compose([
-    Resize((512, 384), Image.BILINEAR),
+    Resize((300,300), Image.BILINEAR),
     ToTensor(),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
 ])
@@ -182,7 +209,7 @@ for images in loader:
 submission['ans'] = all_predictions
 
 # 제출할 파일을 저장합니다.
-submission.to_csv(os.path.join(test_dir, 'submission_new_eff_8_28_eph30.csv'), index=False)
+submission.to_csv(os.path.join(test_dir, 'submission_new_eff_8_29_eph30.csv'), index=False)
 print('test inference is done!')
 
 
