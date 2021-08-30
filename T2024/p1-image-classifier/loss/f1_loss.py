@@ -20,7 +20,7 @@ class F1_loss(nn.Module):
         self.classes = classes
         self.epsilon = epsilon
     
-    def foward(self, y_pred, y_true):
+    def forward(self, y_pred, y_true):
         assert y_pred.ndim == 2
         assert y_true.ndim == 1
 
