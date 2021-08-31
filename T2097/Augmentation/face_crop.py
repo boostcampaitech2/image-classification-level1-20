@@ -57,10 +57,12 @@ def face_crop(img: np.ndarray):
     return img
 
 def face_crop_and_save(path_in, path_out):
-    for img_name in os.listdir(path_in):
+    folder = sorted(os.listdir(path_in))
+    for idx, img_name in enumerate(folder):
         img = get_img(os.path.join(path_in, img_name))
         img = face_crop(img)
         plt.imsave(os.path.join(path_out, img_name), img)
+        if (idx + 1) % 100 == 0: print(f"{idx + 1} / {len(folder)} !")
 
 if __name__ == "__main__":
     face_crop_and_save(r'/opt/ml/mask-classification/data/data',
