@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image
 
 def wrinkle(img_path):
     g_y=np.array([[-1,-1,-1],[0,0,0],[1,1,1]])
@@ -8,4 +9,5 @@ def wrinkle(img_path):
     ret, thresh = cv2.threshold(img_horizon,20,255,cv2.THRESH_BINARY)
     img1= cv2.add(img,img_horizon)
     img1= cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    img1 = Image.fromarray(img1)
     return img1
