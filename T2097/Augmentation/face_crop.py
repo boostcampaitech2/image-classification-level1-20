@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
 from facenet_pytorch import MTCNN
 import os, cv2
 
@@ -54,3 +55,13 @@ def face_crop(img: np.ndarray):
     
     img = img_resize(img, 224, 224)
     return img
+
+def face_crop_and_save(path_in, path_out):
+    for img_name in os.listdir(path_in):
+        img = get_img(os.path.join(path_in, img_name))
+        img = face_crop(img)
+        plt.imsave(os.path.join(path_out, img_name), img)
+
+if __name__ == "__main__":
+    face_crop_and_save(r'/opt/ml/mask-classification/data/data',
+                       r'/opt/ml/mask-classification/data/face_cropped')
