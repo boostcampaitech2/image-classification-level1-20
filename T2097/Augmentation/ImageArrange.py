@@ -55,12 +55,15 @@ class ImageArrange:
         mask, gender, _ = ClassLabel.label_to_feature(label)
         sz = len(os.listdir(os.path.join(path_out, str(label))))
         return '_'.join([str(sz + 1), mask, gender, str(age)])
+    
+    def _copy(self, path_image, path_copy):
+        shutil.copy(path_image, path_copy)
 
     def _copy_and_rename(self, path_image, path_copy, image_name, new_name):
         shutil.copy(path_image, path_copy)
         shutil.move(os.path.join(path_copy, image_name), os.path.join(path_copy, new_name))
 
-    def image_arrange(self, path_in, path_out):
+    def image_arrange(self, path_in, path_out, path_tot = None):
         """
         path_in의 image를 path_out의 class 폴더로 분류
         확장자는 .jpg로 통일
@@ -88,6 +91,7 @@ class ImageArrange:
                 label = ClassLabel(mask, gender, age)
                 file_name = self._get_file_name(path_out, age, label) + ".jpg"
                 self._copy_and_rename(os.path.join(path_folder, image), os.path.join(path_out, str(label)), image, file_name)
+                if path_tot: self._copy(os.path.join(path_folder, image), os.path.join(path_tot, file_name))
             if (idx + 1) % 100 == 0: print(f"{idx + 1} / {len(folders)} !")
 
 # =================================================================================================
@@ -95,4 +99,5 @@ class ImageArrange:
 if __name__ == "__main__":
     ImgArrange = ImageArrange()
     ImgArrange.image_arrange(r'/opt/ml/mask-classification/data/train.tar/train/images',
-                             r'/opt/ml/mask-classification/data/class')
+                             r'/opt/ml/mask-classification/data/class',
+                             path_tot = r'/opt/ml/mask-classification/data/data')
