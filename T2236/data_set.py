@@ -4,6 +4,7 @@ import pandas as pd
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from sklearn.model_selection import StratifiedKFold
 
 
 class TrainDataset(Dataset):
@@ -24,6 +25,28 @@ class TrainDataset(Dataset):
 
     def __len__(self):
         return len(self.img_paths)
+
+class Dataset_kfold(Dataset):
+    def __init__(self, img_paths,label,transform):
+        
+        self.img_paths = img_paths
+        self.label = label
+        self.transform = transform
+            
+    def __getitem__(self, index):
+        image = Image.open(self.img_paths[index])
+
+        if self.transform:
+            image = self.transform(image)
+        
+                
+        return image, self.label[index]
+
+    def __len__(self):
+        return len(self.img_paths)
+
+
+
 
 class TrainDataset_Gender(Dataset):
     def __init__(self, data_df,transform):

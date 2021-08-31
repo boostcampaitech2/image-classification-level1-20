@@ -53,10 +53,10 @@ for paths in tqdm(os.listdir(img_path)):
             
         img = cv2.resize(img,(300,300))
 
-        for i in range(300):
-            if i >195 and i <225:
-                for j in range(300):
-                    img[i][j] = np.array([0,0,0])
+        # for i in range(300):
+        #     if i >195 and i <225:
+        #         for j in range(300):
+        #             img[i][j] = np.array([0,0,0])
         
         tmp = os.path.join(new_img_dir, paths)
         cnt += 1
@@ -108,10 +108,10 @@ for imgs in tqdm(os.listdir(img_path)):
             
     img = cv2.resize(img,(300,300))
 
-    for i in range(300):
-        if i >195 and i <225:
-            for j in range(300):
-                img[i][j] = np.array([0,0,0])
+    # for i in range(300):
+    #     if i >195 and i <225:
+    #         for j in range(300):
+    #             img[i][j] = np.array([0,0,0])
     
     
             

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 from PIL import Image
-import tqdm
+from tqdm import tqdm
 import timm
 
 from sklearn.metrics import f1_score
@@ -21,7 +21,7 @@ from torchvision import models
 from torchvision.transforms import Resize, ToTensor,RandomErasing, Normalize,RandomHorizontalFlip, ColorJitter
 import matplotlib.pyplot as plt
 
-from data_set import TrainDataset
+from data_set import TrainDataset, Dataset_kfold
 
 def seed_everything(seed: int = 42):
     random.seed(seed)
@@ -40,50 +40,20 @@ NUM_EPOCH = 30
 BATCH_SIZE = 16
 LEARNING_RATE =  0.002
 num_classes= 18
-validation_ratio = 0.1
 
 
-
-
-# Dataset
-data_df = pd.read_csv("/opt/ml/canny_new_train_data_path_and_class.csv")
+# Transforms for Dataset
 train_transform = transforms.Compose([
     Resize((512,384), Image.BILINEAR),
     ToTensor(),
     RandomHorizontalFlip(0.5),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
-])   # ColorJitter(contrast=(0.1),brightness=(0.1),hue = 0.1),
-# valid_transform = transforms.Compose([
-#     Resize((300,300), Image.BILINEAR),
-#     ToTensor(),
-#     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
-# ])
-train_dataset = TrainDataset(data_df,train_transform)
-# valid_dataset = TrainDataset(data_df,valid_transform)
-
-# num_train = len(train_dataset)
-# indices = list(range(num_train))
-# split = int(np.floor(validation_ratio * num_train))
-
-# np.random.shuffle(indices)
-
-# train_idx, valid_idx = indices[split:], indices[:split]
-
-# train_sampler = SubsetRandomSampler(train_idx)
-# valid_sampler = SubsetRandomSampler(valid_idx)
-
-# DataLoader
-train_loader = DataLoader(
-    train_dataset,
-    batch_size = BATCH_SIZE,
-    shuffle= True
-)
-# valid_loader = DataLoader(
-#     valid_dataset,
-#     batch_size = BATCH_SIZE,
-#     sampler= valid_sampler
-# )
-
+])   
+valid_transform = transforms.Compose([
+    Resize((512,384), Image.BILINEAR),
+    ToTensor(),
+    Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
+])   
 
 
 # Model
@@ -92,80 +62,54 @@ model =  timm.create_model(model_arch, num_classes = num_classes, pretrained=Tru
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-# def rand_bbox(size, lam):
-#     H = size[2]
-#     W = size[3]
-#     cut_rat = np.sqrt(1. - lam)
-#     cut_w = int(W * cut_rat)
-#     cut_h = int(H * cut_rat)
+
+kfold = StratifiedKFold(n_splits=5, shuffle=True)
+train_df = pd.read_csv("/opt/ml/canny_new_train_data_path_and_class.csv")
+x_train = train_df['path'].to_numpy()
+y_train = train_df['label'].to_numpy()
 
 
-#     cx = np.random.randn() + W//2
-#     cy = np.random.randn() + H//2
-
-#     # 패치의 4점
-#     bbx1 = np.clip(cx - cut_w // 2, 0, W//2)
-#     bby1 = np.clip(cy - cut_h // 2, 0, H)
-#     bbx2 = np.clip(cx + cut_w // 2, 0, W//2)
-#     bby2 = np.clip(cy + cut_h // 2, 0, H)
-
-#     return int(bbx1), int(bby1), int(bbx2), int(bby2)
-
-
-# Train
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
-kfold = StratifiedKFold(n_splits=5, shuffle=True)
-for epoch in tqdm.tqdm(range(NUM_EPOCH)):
-    epoch_f1 = 0.0
-    n_iter = 0.0
-    running_loss = 0.0
-    running_acc = 0.0
 
-
-    model.train()
-	
-		
-    for ind, (images, labels) in enumerate(train_loader):
-
-        images = torch.stack(list(images), dim=0).to(device)
-        labels = torch.tensor(list(labels)).to(device)
-            
+total_acc = 0
+for fold, (train_index, test_index) in enumerate(kfold.split(x_train, y_train)):
         
+    x_train_fold = x_train[train_index]
+    x_test_fold = x_train[test_index]
+    y_train_fold = y_train[train_index]
+    y_test_fold = y_train[test_index]
 
-        logits = model(images)
-        _, preds = torch.max(logits, 1)
-        loss = criterion(logits, labels)
+    train = Dataset_kfold(x_train_fold, y_train_fold,train_transform)
+    test = Dataset_kfold(x_test_fold, y_test_fold,valid_transform)
+    train_loader = DataLoader(train, batch_size = BATCH_SIZE, shuffle = False)
+    test_loader = DataLoader(test, batch_size = BATCH_SIZE, shuffle = False)
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    for epoch in range(NUM_EPOCH):
+        print('\nEpoch {} / {} \nFold number {} / {}'.format(epoch + 1, NUM_EPOCH, fold + 1 , kfold.get_n_splits()))
+        correct = 0
+        model.train()
+        for batch_index, (x_batch, y_batch) in enumerate(train_loader):
+            x_batch = torch.stack(list(x_batch), dim=0).to(device)
+            y_batch = torch.tensor(list(y_batch)).to(device)
 
-        running_loss += loss.item() * images.size(0)
-        running_acc += torch.sum(preds == labels.data)
-        epoch_f1 += f1_score(labels.cpu().numpy(), preds.cpu().numpy(), average='macro')
-        n_iter += 1
+            optimizer.zero_grad()
+            out = model(x_batch)
+            loss = criterion(out, y_batch)
+            loss.backward()
+            optimizer.step()
+            pred = torch.max(out.data, dim=1)[1]
+            correct += (pred == y_batch).sum()
+            if (batch_index + 1) % 16 == 0:
+                print('[{}/{} ({:.0f}%)]\tLoss: {:.6f}\t Accuracy:{:.3f}%'.format(
+                    (batch_index + 1)*len(x_batch), len(train_loader.dataset),
+                    100.*batch_index / len(train_loader), loss.data, float(correct*100) / float(BATCH_SIZE*(batch_index+1))))
+    total_acc += float(correct*100) / float(BATCH_SIZE*(batch_index+1))
+total_acc = (total_acc / kfold.get_n_splits())
+print('\n\nTotal accuracy cross validation: {:.3f}%'.format(total_acc))
 
 
-	# 한 epoch이 모두 종료되었을 때,
-    epoch_loss = running_loss / len(train_loader.dataset)
-    epoch_acc = running_acc / len(train_loader.dataset)
-    epoch_f1 = epoch_f1/n_iter
 
-    print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}")
-
-    # correct = 0
-    # total = 0
-    # for i, data in enumerate(valid_loader, 0):
-    #     inputs, labels = data
-    #     inputs, labels = inputs.to(device), labels.to(device)
-    #     outputs = model(inputs)
-        
-    #     _, predicted = torch.max(outputs.data, 1)
-    #     total += labels.size(0)
-    #     correct += (predicted == labels).sum().item()
-
-    # print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}, Validation ACC:{correct/total:.3f}")
 
 
 # Model Save
