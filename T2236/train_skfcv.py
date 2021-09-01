@@ -88,25 +88,38 @@ for fold, (train_index, test_index) in enumerate(kfold.split(x_train, y_train)):
     for epoch in range(NUM_EPOCH):
         print('\nEpoch {} / {} \nFold number {} / {}'.format(epoch + 1, NUM_EPOCH, fold + 1 , kfold.get_n_splits()))
         correct = 0
+        epoch_f1 = 0.0
+        n_iter = 0.0
+        train_loss = 0.0
+        train_acc = 0.0
         model.train()
         for batch_index, (x_batch, y_batch) in enumerate(train_loader):
             x_batch = torch.stack(list(x_batch), dim=0).to(device)
             y_batch = torch.tensor(list(y_batch)).to(device)
 
-            optimizer.zero_grad()
             out = model(x_batch)
-            loss = criterion(out, y_batch)
-            loss.backward()
-            optimizer.step()
             pred = torch.max(out.data, dim=1)[1]
-            correct += (pred == y_batch).sum()
-            if (batch_index + 1) % 16 == 0:
-                print('[{}/{} ({:.0f}%)]\tLoss: {:.6f}\t Accuracy:{:.3f}%'.format(
-                    (batch_index + 1)*len(x_batch), len(train_loader.dataset),
-                    100.*batch_index / len(train_loader), loss.data, float(correct*100) / float(BATCH_SIZE*(batch_index+1))))
-    total_acc += float(correct*100) / float(BATCH_SIZE*(batch_index+1))
-total_acc = (total_acc / kfold.get_n_splits())
-print('\n\nTotal accuracy cross validation: {:.3f}%'.format(total_acc))
+            loss = criterion(out, y_batch)
+
+            optimizer.zero_grad()
+            optimizer.step()
+            loss.backward()
+            
+            
+            train_acc += (pred == y_batch).sum()
+            train_loss += loss.item() * x_batch.size(0)
+            epoch_f1 += f1_score(y_batch.cpu().numpy(), pred.cpu().numpy(), average='macro')
+            
+        epoch_loss = train_loss / len(train_loader.dataset)
+        epoch_acc = train_acc / len(train_loader.dataset)
+        epoch_f1 = epoch_f1/n_iter
+
+        print(f"Epoch: {epoch} -  Loss : {epoch_loss:.3f},  Accuracy : {epoch_acc:.3f},  F1-Score : {epoch_f1:.4f}")
+
+        
+#     total_acc += float(correct*100) / float(BATCH_SIZE*(batch_index+1))
+# total_acc = (total_acc / kfold.get_n_splits())
+# print('\n\nTotal accuracy cross validation: {:.3f}%'.format(total_acc))
 
 
 

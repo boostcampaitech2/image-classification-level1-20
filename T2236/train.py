@@ -9,6 +9,8 @@ import timm
 from sklearn.metrics import f1_score
 from sklearn.model_selection import StratifiedKFold
 
+from itertools import cycle
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,7 +48,7 @@ validation_ratio = 0.1
 
 
 # Dataset
-data_df = pd.read_csv("/opt/ml/canny_new_train_data_path_and_class.csv")
+data_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
 train_transform = transforms.Compose([
     Resize((512,384), Image.BILINEAR),
     ToTensor(),
@@ -59,30 +61,23 @@ train_transform = transforms.Compose([
 #     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
 # ])
 train_dataset = TrainDataset(data_df,train_transform)
-# valid_dataset = TrainDataset(data_df,valid_transform)
+old_dataset = TrainDataset(data_df,train_transform)
 
-# num_train = len(train_dataset)
-# indices = list(range(num_train))
-# split = int(np.floor(validation_ratio * num_train))
 
-# np.random.shuffle(indices)
-
-# train_idx, valid_idx = indices[split:], indices[:split]
-
-# train_sampler = SubsetRandomSampler(train_idx)
-# valid_sampler = SubsetRandomSampler(valid_idx)
 
 # DataLoader
 train_loader = DataLoader(
     train_dataset,
     batch_size = BATCH_SIZE,
-    shuffle= True
+    shuffle= True,
+    drop_last=True
 )
-# valid_loader = DataLoader(
-#     valid_dataset,
-#     batch_size = BATCH_SIZE,
-#     sampler= valid_sampler
-# )
+old_loader = DataLoader(
+    old_dataset,
+    batch_size = BATCH_SIZE,
+    shuffle= True,
+    drop_last=True
+)
 
 
 
@@ -92,31 +87,29 @@ model =  timm.create_model(model_arch, num_classes = num_classes, pretrained=Tru
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-# def rand_bbox(size, lam):
-#     H = size[2]
-#     W = size[3]
-#     cut_rat = np.sqrt(1. - lam)
-#     cut_w = int(W * cut_rat)
-#     cut_h = int(H * cut_rat)
+def rand_bbox(size, lam):
+    H = size[2]
+    W = size[3]
+    cut_rat = np.sqrt(1. - lam)
+    cut_w = int(W * cut_rat)
+    cut_h = int(H * cut_rat)
 
 
-#     cx = np.random.randn() + W//2
-#     cy = np.random.randn() + H//2
+    cx = np.random.randn() + W//2
 
-#     # 패치의 4점
-#     bbx1 = np.clip(cx - cut_w // 2, 0, W//2)
-#     bby1 = np.clip(cy - cut_h // 2, 0, H)
-#     bbx2 = np.clip(cx + cut_w // 2, 0, W//2)
-#     bby2 = np.clip(cy + cut_h // 2, 0, H)
+    # 패치의 4점
+    bbx1 = 0
+    bbx2 = np.clip(cx + cut_w // 2, 0, W//2)
+    
 
-#     return int(bbx1), int(bby1), int(bbx2), int(bby2)
+    return int(bbx1), int(bby1), int(bbx2), int(bby2)
 
 
 # Train
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr = LEARNING_RATE)
 kfold = StratifiedKFold(n_splits=5, shuffle=True)
-for epoch in tqdm.tqdm(range(NUM_EPOCH)):
+for epoch in range(NUM_EPOCH):
     epoch_f1 = 0.0
     n_iter = 0.0
     running_loss = 0.0
@@ -126,16 +119,38 @@ for epoch in tqdm.tqdm(range(NUM_EPOCH)):
     model.train()
 	
 		
-    for ind, (images, labels) in enumerate(train_loader):
+    for (i, data), (j, data_60) in zip(enumerate(train_loader, 0),cycle(enumerate(old_loader, 0))):
 
+        images, labels = data
         images = torch.stack(list(images), dim=0).to(device)
         labels = torch.tensor(list(labels)).to(device)
             
-        
+        inputs_60, labels_60 = data_60
+        inputs_60 = inputs_60.to(device)
+        labels_60 = labels_60.to(device)
 
-        logits = model(images)
-        _, preds = torch.max(logits, 1)
-        loss = criterion(logits, labels)
+        if np.random.random() > 0.5 :
+            rand_index = torch.randperm(inputs_60.size()[0]) # 패치에 사용할 label
+            target_a = labels # 원본 이미지 label
+            target_b = labels_60[rand_index] # 패치 이미지 label  
+            lam = np.random.beta(1.0, 1.0)     
+            # bbx1, bby1, bbx2, bby2 = rand_bbox(inputs_60.size(), lam)
+
+                # 원본 데이터에 컷믹스 패치
+            images[:, :, :, :150] = inputs_60[rand_index, :, :, :150]
+
+                # 원본 이미지와 패치 이미지의 넓이 비율
+            lam = 0.5
+
+                # 예측은 레이블 1개
+            logits = model(images)
+            _, preds = torch.max(logits, 1)
+                # 원본 이미지의 레이블과 패치 이미지의 레이블에 대해 loss 가중합
+            loss = criterion(logits, target_a) * lam + criterion(logits, target_b) * (1. - lam)
+        else:
+            logits = model(images)
+            _, preds = torch.max(logits, 1)
+            loss = criterion(logits, labels)
 
         optimizer.zero_grad()
         loss.backward()
