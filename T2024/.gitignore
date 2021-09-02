@@ -1,2 +1,5 @@
 .ipynb_checkpoints
 wandb
+p1-image-classifier/dataset/__pycache__
+p1-image-classifier/losses/__pycache__
+p1-image-classifier/models/__pycache__
