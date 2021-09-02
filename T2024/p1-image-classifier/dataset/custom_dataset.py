@@ -18,13 +18,12 @@ class Custom_Dataset(Dataset):
         train ([boolean]) : train 목적의 bool 값
     """
     
-    def __init__(self, path, target, transforms, train=True):
+    def __init__(self, df, target, transforms, train=True):
         super().__init__()
         self.train = train
-        self.path = path
+        self.data = df
         self.transforms = transforms
         self.target = target
-        self.data = pd.read_csv(path, index_col=0).reset_index(drop=True).copy()
 
         self.img_paths = self.data['path']
         self.labels = list(self.data[target])
@@ -48,18 +47,3 @@ class Custom_Dataset(Dataset):
             return X, y
         
         return X
-
-class TestDataset(Dataset):
-    def __init__(self, img_paths, transform):
-        self.img_paths = img_paths
-        self.transform = transform
-
-    def __getitem__(self, index):
-        image = Image.open(self.img_paths[index])
-
-        if self.transform:
-            image = self.transform(image)
-        return image
-
-    def __len__(self):
-        return len(self.img_paths)
