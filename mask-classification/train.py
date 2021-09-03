@@ -162,8 +162,9 @@ def main(config, model_name, checkpoint=False):
     print ("PyTorch version:[%s]."%(torch.__version__))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #'cuda:0'
     print ("device:[%s]."%(device))
-    num_classes = 18
-    epochs = 30
+    model_name = config['model_name']['name']
+    num_classes = config['model_name']['num_classes']
+    epochs = config['model_name']['epochs'] 
     target = config[model_name]['target']
 
 
@@ -178,7 +179,7 @@ def main(config, model_name, checkpoint=False):
     BATCH_SIZE = config[model_name]['batch_size']
     cutmix = config[model_name]['cutmix'] # boolean
     path = '/' # checkpoint path
-    model_name = config['model_name']['name'] # ?
+   # ?
     dir = config[model_name]['dir'] # 모델 별 이미지 경로
 
     transform = transforms.Compose([

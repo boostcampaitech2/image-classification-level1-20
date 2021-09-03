@@ -7,7 +7,7 @@ import timm
 class EfficientNet(nn.Module):
     def __init__(self, num_classes):
         super(EfficientNet, self).__init__()
-        self.model = timm.create_model('tf_efficientnet_b4', num_classes=num_classes, pretrained=True)
+        self.model = timm.create_model('efficientnet_b4', num_classes=num_classes, pretrained=True)
     
     def forward(self, x):
         output = self.model(x)
