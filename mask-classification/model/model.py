@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import torchvision
 import timm
-
+from torchvision.models import resnet50
 
 class EfficientNet(nn.Module):
     def __init__(self, num_classes):
@@ -14,9 +14,36 @@ class EfficientNet(nn.Module):
         return output
 
 ## resnet은 수정
-class resnet50(nn.Module):
+class ResNet_Mask(nn.Module):
     def __init__(self, num_classes):
-        super(resnet50).__init__()
+        super(ResNet_Mask,self).__init__()
+        self.ft_model=resnet50(pretrained=True)
+        self.num_classes=num_classes
+
+
+        num_ftrs = self.ft_model.fc.in_features
+        self.ft_model.fc=nn.Linear(num_ftrs, self.num_classes) 
+
+    def forward(self, x):
+        output = self.ft_model(x)
+        return output
+
+class ResNet_Gender(nn.Module):
+    def __init__(self, num_classes):
+        super(ResNet_Gender,self).__init__()
+        self.ft_model=torchvision.models.resnet50(pretrained=True)
+
+
+        num_ftrs = self.ft_model.fc.in_features
+        self.ft_model.fc=nn.Linear(num_ftrs,num_classes) 
+
+    def forward(self, x):
+        output = self.ft_model(x)
+        return output
+
+class ResNet_Age(nn.Module):
+    def __init__(self, num_classes):
+        super(ResNet_Age,self).__init__()
         self.ft_model=torchvision.models.resnet50(pretrained=True)
 
 

@@ -48,11 +48,11 @@ class MaskDataset(Dataset):
         mask ,gender,age = labeling(self.im_paths[idx])
         if self.y_type=='label':
             y=encoding(mask,gender,age)
-        elif self.y_type=='age':
+        elif self.y_type=='age_code':
             y=age
-        elif self.y_type=='mask':
+        elif self.y_type=='mask_code':
             y=mask
-        elif self.y_type=='gender':
+        elif self.y_type=='gender_code':
             y=gender
 
         return X, y
