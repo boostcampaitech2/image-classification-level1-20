@@ -8,8 +8,6 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import os.path
 import glob
-
-
 def labeling(path):
     split_path= path.split('/')
     directory = split_path[-2].split('_')
@@ -21,30 +19,25 @@ def labeling(path):
         age=1
     else: age=2
     image_name = split_path[-1]
-    mask=[0 for _ in range(3)]
+    masked=[0 for _ in range(3)]
     if image_name[0]=='m':
-        mask=0
+        masked=0
     elif image_name[0]=='i':
-        mask=1
-    else: mask=2
-    return mask, gender, age
+        masked=1
+    else: masked=2
+    return masked, gender, age
 
 def encoding(mask,gender,age):
     return mask*6 + gender*3 +age
 
-
-
+    
 class MaskDataset(Dataset):
-    def __init__(self,im_paths):
+    def __init__(self,im_paths, transform, y_type='label'):
         self.im_paths=im_paths
         self.shape =(3,512,384)
 
-        self.train_transform = transforms.Compose([
-        Resize((512,384), Image.BILINEAR),
-        ToTensor(),
-        RandomHorizontalFlip(0.5),
-        Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
-])
+        self.train_transform = transform
+        self.y_type=y_type
     def __len__(self):
         return len(self.im_paths)
 
@@ -54,29 +47,30 @@ class MaskDataset(Dataset):
         X= self.train_transform(X)
         
         mask ,gender,age = labeling(self.im_paths[idx])
-        label = encoding(age,gender,age)
-        return X, label
+        if self.y_type=='label':
+            y=encoding(mask,gender,age)
+        elif self.y_type=='age':
+            y=age
+        elif self.y_type=='mask':
+            y=mask
+        elif self.y_type=='gender':
+            y=gender
+
+        return X, y
 
 class TestMaskDataset(Dataset):
-    def __init__(self,im_paths):
+    def __init__(self,im_paths,transform):
         self.im_paths=im_paths
         self.shape =(3,512,384)
 
-        self.train_transform = transforms.Compose([
-        Resize((512,384), Image.BILINEAR),
-        ToTensor(),
-        RandomHorizontalFlip(0.5),
-        Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
-])
+        self.test_transform = transform
+
+
     def __len__(self):
         return len(self.im_paths)
 
     def __getitem__(self,idx):
         X = Image.open(self.im_paths[idx])
-        X= self.train_transform(X)
+        X= self.test_transform(X)
         return X
-
-
-
-
 
