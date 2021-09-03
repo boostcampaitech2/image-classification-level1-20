@@ -56,7 +56,6 @@ def rand_bbox(size, lam):
 
 
 def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, cutmix):
-    correct = 0
     epoch_f1 = 0.0
     n_iter = 0.0
     train_loss = 0.0
@@ -83,6 +82,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, c
                     logits = model(x_batch.float())
                     loss = criterion(logits, target_a) * lam + criterion(logits, targeb_b) * (1. - lam)
 
+                    _, preds = torch.max(logits, 1)
                     scaler.scale(loss).backward()
                     scaler.step(optimizer)
                     scaler.update()
@@ -91,23 +91,24 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, c
                     logits = model(x_batch.float())
                     loss = criterion(logits, y_batch)
 
+                    _, preds = torch.max(logits, 1)
                     scaler.scale(loss).backward()
                     scaler.step(optimizer)
                     scaler.update()
 
             else:
-                out = model(x_batch)
-                loss = criterion(out, y_batch)
+                logits = model(x_batch.float())
+                loss = criterion(logits, y_batch)
                 
+                _, preds = torch.max(logits, 1)
                 scaler.scale(loss).backward()
                 scaler.step(optimizer)
                 scaler.update()
             
 
-        pred = torch.max(out.data, dim=1)[1]
-        train_acc += (pred == y_batch).sum()
         train_loss += loss.item() * x_batch.size(0)
-        epoch_f1 += f1_score(y_batch.cpu().numpy(), pred.cpu().numpy(), average='macro')
+        train_acc += torch.sum(preds == y_batch.data)
+        epoch_f1 += f1_score(y_batch.cpu().numpy(), preds.cpu().numpy(), average='macro')
         n_iter += 1
         
     epoch_loss = train_loss / len(train_loader.dataset)
