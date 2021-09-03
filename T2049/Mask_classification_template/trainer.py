@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 class Trainer():
-    def __init__(self, model, criterion, optimizer, lr_scheduler, 
+    def __init__(self, config, model, criterion, optimizer, lr_scheduler, 
                 device, data_loader, valid_data_loader, num_trainset, num_validset, epochs):
         self.device = device
         self.model = model.to(self.device)
@@ -32,16 +32,19 @@ class Trainer():
         self.model.train()
         self.train_total_loss = 0
         self.train_correct = 0
+        print(self.device)
         for data, target in tqdm(self.data_loader, leave=False):
+            
             data = data.to(self.device)
             target = target.to(self.device)
             pred = self.model(data)
             loss = self.criterion(pred, target)
+            # print([pred.argmax(dim=1), target])
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            # self.lr_scheduler.step()
+        # self.lr_scheduler.step()
 
             self.train_correct += sum(pred.argmax(dim=1) == target)
             self.train_total_loss += loss.item()
@@ -57,11 +60,15 @@ class Trainer():
             self.valid_total_loss = 0
             self.valid_correct = 0
             loop = tqdm(self.valid_loader, total=len(self.valid_loader))
+
             for data, target in loop:
                 data = data.to(self.device)
                 target = target.to(self.device)
                 pred = self.model(data)
                 loss = self.criterion(pred, target)
+
+                print([pred.argmax(dim=1), target])
+
 
                 # metric도 모듈화 하고 싶은데 아직 감이 안온다
                 self.valid_correct += sum(pred.argmax(dim=1) == target)
