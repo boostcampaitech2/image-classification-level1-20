@@ -15,7 +15,7 @@
         "cutmix": false,
         "dir": "/opt/ml/input/data/train/images/",
         "num_classes": 3,
-        "target": "mask",
+        "target": "mask_code",
         "epochs": 30,
         "transform": "ResNet_transform"
     },
@@ -25,7 +25,7 @@
         "cutmix": false,
         "dir": "/opt/ml/input/data/train/images/",
         "num_classes": 2,
-        "target": "gender",
+        "target": "gender_code",
         "epochs": 30,
         "transform": "ResNet_transform"
     },
@@ -35,7 +35,7 @@
         "cutmix": false,
         "dir": "/opt/ml/input/data/train/images/",
         "num_classes": 3,
-        "target": "age",
+        "target": "age_code",
         "epochs": 30,
         "transform": "ResNet_transform"
     },
