@@ -45,7 +45,7 @@ if __name__ == "__main__":
     ]
 
     for i in range(12600):
-        ans[i][0] = csv_data[i][0]
+        ans[i][0] = csv_data[0][i + 1][0]
         ans[i][1] = vote(p, [int(csv_data[j][i + 1][1]) for j in range(3)])
 
     df = pd.DataFrame(ans)
