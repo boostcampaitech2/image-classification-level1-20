@@ -39,7 +39,7 @@ seed_everything()
 
 # Parameter
 NUM_EPOCH = 30
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 LEARNING_RATE =  0.002
 num_classes= 18
 validation_ratio = 0.1
@@ -50,7 +50,7 @@ validation_ratio = 0.1
 # Dataset
 data_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
 train_transform = transforms.Compose([
-    Resize((512,384), Image.BILINEAR),
+    Resize((300,300), Image.BILINEAR),
     ToTensor(),
     RandomHorizontalFlip(0.5),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
@@ -87,22 +87,7 @@ model =  timm.create_model(model_arch, num_classes = num_classes, pretrained=Tru
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-def rand_bbox(size, lam):
-    H = size[2]
-    W = size[3]
-    cut_rat = np.sqrt(1. - lam)
-    cut_w = int(W * cut_rat)
-    cut_h = int(H * cut_rat)
 
-
-    cx = np.random.randn() + W//2
-
-    # 패치의 4점
-    bbx1 = 0
-    bbx2 = np.clip(cx + cut_w // 2, 0, W//2)
-    
-
-    return int(bbx1), int(bby1), int(bbx2), int(bby2)
 
 
 # Train
@@ -118,8 +103,8 @@ for epoch in range(NUM_EPOCH):
 
     model.train()
 	
-		
-    for (i, data), (j, data_60) in zip(enumerate(train_loader, 0),cycle(enumerate(old_loader, 0))):
+	
+    for (i, data), (j, data_60) in tqdm.tqdm(zip(enumerate(train_loader, 0),cycle(enumerate(old_loader, 0))),total=len(train_loader)):
 
         images, labels = data
         images = torch.stack(list(images), dim=0).to(device)
@@ -129,28 +114,30 @@ for epoch in range(NUM_EPOCH):
         inputs_60 = inputs_60.to(device)
         labels_60 = labels_60.to(device)
 
-        if np.random.random() > 0.5 :
-            rand_index = torch.randperm(inputs_60.size()[0]) # 패치에 사용할 label
-            target_a = labels # 원본 이미지 label
-            target_b = labels_60[rand_index] # 패치 이미지 label  
-            lam = np.random.beta(1.0, 1.0)     
-            # bbx1, bby1, bbx2, bby2 = rand_bbox(inputs_60.size(), lam)
+        with torch.cuda.amp.autocast():
 
-                # 원본 데이터에 컷믹스 패치
-            images[:, :, :, :150] = inputs_60[rand_index, :, :, :150]
+            if np.random.random() >= 0.75 :
+                rand_index = torch.randperm(inputs_60.size()[0]) # 패치에 사용할 label
+                target_a = labels # 원본 이미지 label
+                target_b = labels_60[rand_index] # 패치 이미지 label  
+                lam = np.random.beta(1.0, 1.0)     
+                # bbx1, bby1, bbx2, bby2 = rand_bbox(inputs_60.size(), lam)
 
-                # 원본 이미지와 패치 이미지의 넓이 비율
-            lam = 0.5
+                    # 원본 데이터에 컷믹스 패치
+                images[:, :, :, :150] = inputs_60[rand_index, :, :, :150]
 
-                # 예측은 레이블 1개
-            logits = model(images)
-            _, preds = torch.max(logits, 1)
-                # 원본 이미지의 레이블과 패치 이미지의 레이블에 대해 loss 가중합
-            loss = criterion(logits, target_a) * lam + criterion(logits, target_b) * (1. - lam)
-        else:
-            logits = model(images)
-            _, preds = torch.max(logits, 1)
-            loss = criterion(logits, labels)
+                    # 원본 이미지와 패치 이미지의 넓이 비율
+                lam = 0.5
+
+                    # 예측은 레이블 1개
+                logits = model(images)
+                _, preds = torch.max(logits, 1)
+                    # 원본 이미지의 레이블과 패치 이미지의 레이블에 대해 loss 가중합
+                loss = criterion(logits, target_a) * lam + criterion(logits, target_b) * (1. - lam)
+            else:
+                logits = model(images)
+                _, preds = torch.max(logits, 1)
+                loss = criterion(logits, labels)
 
         optimizer.zero_grad()
         loss.backward()
@@ -184,7 +171,7 @@ for epoch in range(NUM_EPOCH):
 
 
 # Model Save
-PATH = model_arch +"model_saved_eff_best_b4_epoch_30_with_canny.pt"
+PATH = model_arch +"model_saved_eff_best_b4_epoch_30_with_cutmix7.pt"
 torch.save({'epoch': NUM_EPOCH,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
@@ -209,12 +196,12 @@ class TestDataset(Dataset):
 
 test_dir = '/opt/ml/input/data/eval'
 submission = pd.read_csv(os.path.join(test_dir, 'info.csv'))
-image_dir = os.path.join(test_dir, 'canny_new_imgs')
+image_dir = os.path.join(test_dir, 'new_imgs')
 
 # Test Dataset 클래스 객체를 생성하고 DataLoader를 만듭니다.
 image_paths = [os.path.join(image_dir, img_id) for img_id in submission.ImageID]
 transform = transforms.Compose([
-    Resize((512,384), Image.BILINEAR),
+    Resize((300,300), Image.BILINEAR),
     ToTensor(),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.2, 0.2, 0.2)),
 ])
@@ -239,7 +226,7 @@ for images in loader:
 submission['ans'] = all_predictions
 
 # 제출할 파일을 저장합니다.
-submission.to_csv(os.path.join(test_dir, 'submission_new_eff_b4_8_31_eph30_with_canny.csv'), index=False)
+submission.to_csv(os.path.join(test_dir, 'submission_new_eff_b4_8_31_eph30_with_cutmix7.csv'), index=False)
 print('test inference is done!')
 
 
