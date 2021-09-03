@@ -50,4 +50,4 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(ans)
     df.columns = ['ImageID', 'ans']
-    df.to_csv(path_out, header=False, index=False)
+    df.to_csv(path_out, index=False)
