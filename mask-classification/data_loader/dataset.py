@@ -32,8 +32,9 @@ def encoding(mask,gender,age):
 
     
 class MaskDataset(Dataset):
-    def __init__(self, im_paths,im_dir_path,transform, y_type='label'):
-        self.im_paths=os.path.join(im_dir_path,im_paths)
+    def __init__(self, im_dir_path, im_paths,transform, y_type='label'):
+        self.im_paths=im_paths
+        self.im_dir_path =im_dir_path
         self.shape =(3,512,384)
         self.train_transform = transform
         self.y_type=y_type
@@ -41,7 +42,7 @@ class MaskDataset(Dataset):
         return len(self.im_paths)
 
     def __getitem__(self,idx):
-        X = Image.open(self.im_paths[idx])
+        X = Image.open(os.path.join(self.im_dir_path,self.im_paths[idx]))
         X= self.train_transform(X)
         
         mask ,gender,age = labeling(self.im_paths[idx])
@@ -57,7 +58,7 @@ class MaskDataset(Dataset):
         return X, y
 
 class TestMaskDataset(Dataset):
-    def __init__(self,im_paths,im_dir_path,transform):
+    def __init__(self,im_dir_path, im_paths, transform):
         self.im_paths=self.im_paths=os.path.join(im_dir_path,im_paths)
         self.shape =(3,512,384)
 

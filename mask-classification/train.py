@@ -8,6 +8,7 @@ import random
 from importlib import import_module
 from timm.models.byobnet import num_groups
 from timm.models.efficientnet import EfficientNet
+from tqdm import tqdm
 
 from torch import nn, optim
 from torchvision.models.resnet import resnet50
@@ -61,7 +62,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, c
     train_loss = 0.0
     train_acc = 0.0
     model.train()
-    for batch_index, (x_batch, y_batch) in enumerate(train_loader):
+    for batch_index, (x_batch, y_batch) in enumerate(tqdm(train_loader)):
         x_batch = torch.stack(list(x_batch), dim=0).to(device)
         y_batch = torch.tensor(list(y_batch)).to(device)
 
@@ -107,6 +108,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, c
         train_acc += (pred == y_batch).sum()
         train_loss += loss.item() * x_batch.size(0)
         epoch_f1 += f1_score(y_batch.cpu().numpy(), pred.cpu().numpy(), average='macro')
+        n_iter += 1
         
     epoch_loss = train_loss / len(train_loader.dataset)
     epoch_acc = train_acc / len(train_loader.dataset)
@@ -147,7 +149,7 @@ def validation(model, test_loader, criterion, device):
 
 
 def get_model(model_name, num_classes, device):
-    module = getattr(import_module('/model/model.py'), model_name)
+    module = getattr(import_module('model.model'), model_name)
     model = module(num_classes)
     model.to(device)
 
@@ -166,39 +168,39 @@ def main(config, model_name, checkpoint=False):
     num_classes = config[model_name]['num_classes']
     epochs = config[model_name]['epochs'] 
     target = config[model_name]['target']
-    dir = config[model_name]['dir'] # 모델 별 이미지 경로
+    dir_ = config[model_name]['dir'] # 모델 별 이미지 경로
     cutmix = config[model_name]['cutmix'] 
     batch_size = config[model_name]['batch_size'] 
     lr_rate = config[model_name]['lr_rate'] 
 
 
     kfold = StratifiedKFold(n_splits=5, shuffle=True)
-    train_df = pd.read_csv("/opt/ml/path_and_label.csv")
+    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label.csv")
     
     x_train = train_df['path'].to_numpy()
     y_train = train_df[target].to_numpy()
     
     # /opt/ml/best_model
-    path = '/' # checkpoint path
+    path = '/opt/ml/team_github/image-classification-level1-20/mask-classification/model_saved' # checkpoint path
  
-    transform_module = getattr(data_transform, config[model_name]["transform"])
-    transform = transform_module()
-
-    model = get_model(model_name=model_name, num_classes=num_classes, device=device)
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
-    scaler = grad_scaler.GradScaler()
     
 
     for fold, (train_index, test_index) in enumerate(kfold.split(x_train, y_train)):
         torch.cuda.empty_cache()
+        transform_module = getattr(data_transform, config[model_name]["transform"])
+        transform = transform_module()
+
+        model = get_model(model_name=model_name, num_classes=num_classes, device=device)
+
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
+        scaler = grad_scaler.GradScaler()
 
         x_train_fold = x_train[train_index]
         x_test_fold = x_train[test_index]
 
-        train = MaskDataset(dir, x_train_fold, transform, target)
-        test = MaskDataset(dir, x_test_fold, transform, target)
+        train = MaskDataset(dir_, x_train_fold, transform, target)
+        test = MaskDataset(dir_, x_test_fold, transform, target)
         train_loader = DataLoader(train, batch_size = batch_size, shuffle = False)
         test_loader = DataLoader(test, batch_size = batch_size, shuffle = False)
         
@@ -210,13 +212,15 @@ def main(config, model_name, checkpoint=False):
             print(f'epoch : {epoch}, loss : {loss}, acc : {acc}, f1 : {f1}')
 
             if f1 > best_f1:
-                torch.save(model.state_dict(), path)
+                model_saved = model_name + "model_saved" + str(fold) + ".pt"
+                torch.save(model.state_dict(), os.path.join(path,model_saved))
                 best_f1 = f1
 
 
         # validation
         with torch.no_grad():
-            model.load(torch.load(path))
+            model_saved = model_name + "model_saved" + str(fold) + ".pt"
+            model.load_state_dict(torch.load(os.path.join(path,model_saved)))
             model.eval()
             val_loss, val_f1 = validation(model, test_loader, criterion, device)
 
@@ -232,7 +236,7 @@ if __name__ == '__main__':
     # parser.add_argument('--lr_rate', type=float, required=False)
     # parser.add_argument('--batch_size', type=int, required=False)
     # parser.add_argument('--cutmix', type=bool, default=False)
-    # parser.add_argument('--dir', type=str, required=False)
+    # parser.add_argument('--dir_', type=str, required=False)
     # parser.add_argument('--num_classses', type=int, required=False)
     # parser.add_argument('--target', type=str, required=False)
     # parser.add_argument('--epochs', type=int, required=False)
@@ -243,10 +247,10 @@ if __name__ == '__main__':
     
 
     
-    config = OmegaConf.load("config.json")
+    config = OmegaConf.load("/opt/ml/team_github/image-classification-level1-20/mask-classification/config.json")
 
-    if args.load_model:
-        checkpoint = torch.load(f"/opt/ml/code/custom/best_model/{args.load_model}")
-        main(config, model_name, checkpoint)
-    else:
-        main(config, model_name)
+    # if args.load_model:
+    #     checkpoint = torch.load(f"/opt/ml/code/custom/best_model/{args.load_model}")
+    #     main(config, model_name, checkpoint)
+    # else:
+    main(config, model_name)

@@ -3,10 +3,10 @@
         "lr_rate": 0.002,
         "batch_size": 32,
         "cutmix": false,
-        "dir": "/opt/ml/input/train/new_imgs/",
+        "dir": "/opt/ml/input/data/train/new_imgs/",
         "num_classes": 18,
         "target": "label",
-        "epochs": 30,
+        "epochs": 1,
         "transform": "Efficient_transform"
     }
 }
