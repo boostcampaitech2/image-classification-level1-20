@@ -29,14 +29,7 @@ def vote(p: list, data: list) -> int:
     return mask_label * 6 + gender_label * 3 + age_label
 
 if __name__ == "__main__":
-    path_in = ["", "", "", "", ""] # Efficient, VIT, Res_mask, Res_gender, Res_age
-    path_out = "" # output csv
-
-    csv_data = [np.loadtxt(path, delimiter=',', dtype=str) for path in path_in]
-    csv_data[2] = compress(csv_data[2], csv_data[3], csv_data[4])
-    csv_data.pop(); csv_data.pop();
-
-    ans = [['', ''] for _ in range(12600)]
+    path_out = "/opt/ml/image-classification-level1-20/T2097/test/output.csv" # output csv
 
     p = [
         [0.2, 0.2, 0.2], # mask
@@ -44,10 +37,6 @@ if __name__ == "__main__":
         [0.3, 0.3, 0.3] # age
     ]
 
-    for i in range(12600):
-        ans[i][0] = csv_data[0][i + 1][0]
-        ans[i][1] = vote(p, [int(csv_data[j][i + 1][1]) for j in range(3)])
-
-    df = pd.DataFrame(ans)
-    df.columns = ['ImageID', 'ans']
+    df = pd.DataFrame(p)
+    df.columns = ['ImageID', 'ans', 'ans']
     df.to_csv(path_out, index=False)
