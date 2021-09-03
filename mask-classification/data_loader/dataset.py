@@ -15,11 +15,10 @@ def labeling(path):
     age = (int(directory[-1]))
     if age<30:
         age=0
-    elif age<50:
+    elif age<60:
         age=1
     else: age=2
     image_name = split_path[-1]
-    masked=[0 for _ in range(3)]
     if image_name[0]=='m':
         masked=0
     elif image_name[0]=='i':
