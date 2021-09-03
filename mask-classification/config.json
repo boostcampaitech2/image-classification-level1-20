@@ -1,3 +1,13 @@
 {
-    "efficientnet":{"name": "EfficientNet", "lr_rate":0.002 ,"batch_size":32,"cutmix":null, "dir":"/opt/ml/input/train/new_imgs/","num_classes":18, "target": "label", "epochs":30}
+    "model_name": "efficientnet",
+    "efficientnet": {
+        "name": "EfficientNet",
+        "lr_rate": 0.002,
+        "batch_size": 32,
+        "cutmix": null,
+        "dir": "/opt/ml/input/train/new_imgs/",
+        "num_classes": 18,
+        "target": "label",
+        "epochs": 30
+    }
 }

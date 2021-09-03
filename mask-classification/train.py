@@ -162,9 +162,9 @@ def main(config, model_name, checkpoint=False):
     print ("PyTorch version:[%s]."%(torch.__version__))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #'cuda:0'
     print ("device:[%s]."%(device))
-    model_name = config['model_name']['name']
-    num_classes = config['model_name']['num_classes']
-    epochs = config['model_name']['epochs'] 
+    model_name = config['model_name']
+    num_classes = config[model_name]['num_classes']
+    epochs = config[model_name]['epochs'] 
     target = config[model_name]['target']
 
 
@@ -230,7 +230,17 @@ def main(config, model_name, checkpoint=False):
 if __name__ == '__main__':
     # argparser
     parser = argparse.ArgumentParser(description='PyTorch Template')
+    parser.add_argument('-bs', '--batch_size', type=int,
+                      help='Batch size for input/valid data(ex.1, 2, 4, ..,16, 32, ..)', required=True)
+    parser.add_argument('-cf', '--collate_fn', type=str,
+                      help='face_net_wrinkle_collate_fn', default=False)
+    parser.add_argument('-lr', '--learning_rate', type=float,
+                      help='Learning rate for training(ex.0.001)', required=True)
+    parser.add_argument('-ep', '--epochs', type=int,
+                      help='Number of iteration for total dataset(ex. 5, 10, ..)', required=True)
     
+    parser.add_argument('-lm', '--load_model', type=str,
+                      help='Load model by file name (ex. 2021-08-23-4-23_bs-16_lr-0.0001', default=False)
     # paser.arg.... 
 
     args = parser.parse_args()
