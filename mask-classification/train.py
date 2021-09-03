@@ -60,7 +60,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, c
     n_iter = 0.0
     train_loss = 0.0
     train_acc = 0.0
-    model.train()
+    
     for batch_index, (x_batch, y_batch) in enumerate(tqdm(train_loader)):
         x_batch = torch.stack(list(x_batch), dim=0).to(device)
         y_batch = torch.tensor(list(y_batch)).to(device)
@@ -187,6 +187,7 @@ def main(config, model_name, checkpoint=False):
     
 
     for fold, (train_index, test_index) in enumerate(kfold.split(x_train, y_train)):
+        print(str(fold+1) + "/5 Fold :")
         torch.cuda.empty_cache()
         transform_module = getattr(data_transform, config[model_name]["transform"])
         transform = transform_module()
@@ -206,26 +207,27 @@ def main(config, model_name, checkpoint=False):
         test_loader = DataLoader(test, batch_size = batch_size, shuffle = False)
         
         # train
-        model.train()
+        
         best_f1 = 0.
         for epoch in range(epochs):
+            model.train()
             loss, acc, f1 = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, cutmix=cutmix)
             print(f'epoch : {epoch}, loss : {loss}, acc : {acc}, f1 : {f1}')
 
-            if f1 > best_f1:
-                model_saved = model_name + "model_saved" + str(fold) + ".pt"
-                torch.save(model.state_dict(), os.path.join(path,model_saved))
-                best_f1 = f1
+            
 
 
         # validation
-        with torch.no_grad():
-            model_saved = model_name + "model_saved" + str(fold) + ".pt"
-            model.load_state_dict(torch.load(os.path.join(path,model_saved)))
-            model.eval()
-            val_loss, val_f1 = validation(model, test_loader, criterion, device)
-
-        print(f'val loss : {val_loss:.3f}, val f1 : {val_f1:.3f}')
+            with torch.no_grad():
+                
+                model.eval()
+                val_loss, val_f1 = validation(model, test_loader, criterion, device)
+                if val_f1 > best_f1:
+                    model_saved = model_name + "model_saved" + str(fold) + ".pt"
+                    torch.save(model.state_dict(), os.path.join(path,model_saved))
+                    best_f1 = val_f1
+            
+                print(f'val loss : {val_loss:.3f}, val f1 : {val_f1:.3f}')
         del model, optimizer, test_loader, scaler
 
 

@@ -6,7 +6,47 @@
         "dir": "/opt/ml/input/data/train/new_imgs/",
         "num_classes": 18,
         "target": "label",
-        "epochs": 1,
+        "epochs": 30,
         "transform": "Efficient_transform"
+    },
+    "ResNet_Mask": {
+        "lr_rate": 0.01,
+        "batch_size": 32,
+        "cutmix": false,
+        "dir": "/opt/ml/input/data/train/images/",
+        "num_classes": 3,
+        "target": "mask",
+        "epochs": 30,
+        "transform": "ResNet_transform"
+    },
+    "ResNet_Gender": {
+        "lr_rate": 0.01,
+        "batch_size": 32,
+        "cutmix": false,
+        "dir": "/opt/ml/input/data/train/images/",
+        "num_classes": 2,
+        "target": "gender",
+        "epochs": 30,
+        "transform": "ResNet_transform"
+    },
+    "ResNet_Age": {
+        "lr_rate": 0.01,
+        "batch_size": 32,
+        "cutmix": false,
+        "dir": "/opt/ml/input/data/train/images/",
+        "num_classes": 3,
+        "target": "age",
+        "epochs": 30,
+        "transform": "ResNet_transform"
+    },
+    "VIT": {
+        "lr_rate": 0.002,
+        "batch_size": 32,
+        "cutmix": true,
+        "dir": "/opt/ml/input/data/train/images/",
+        "num_classes": 18,
+        "target": "label",
+        "epochs": 30,
+        "transform": "VIT_transform"
     }
 }
