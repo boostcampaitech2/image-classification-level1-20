@@ -23,6 +23,7 @@ from sklearn.metrics import f1_score
 
 from data_loader.dataset import MaskDataset
 from model.model import VIT, EfficientNet, resnet50
+import data_transform
 
 def set_seed(random_seed):
     torch.manual_seed(random_seed)
@@ -53,7 +54,7 @@ def rand_bbox(size, lam):
     return int(bbx1), int(bby1), int(bbx2), int(bby2)
 
 
-def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, cutmix=True):
+def train_one_epoch(model, train_loader, criterion, optimizer, device, scaler, cutmix):
     correct = 0
     epoch_f1 = 0.0
     n_iter = 0.0
@@ -162,29 +163,26 @@ def main(config, model_name, checkpoint=False):
     print ("PyTorch version:[%s]."%(torch.__version__))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #'cuda:0'
     print ("device:[%s]."%(device))
-    model_name = config['model_name']
     num_classes = config[model_name]['num_classes']
     epochs = config[model_name]['epochs'] 
     target = config[model_name]['target']
+    dir = config[model_name]['dir'] # 모델 별 이미지 경로
+    cutmix = config[model_name]['cutmix'] 
+    batch_size = config[model_name]['batch_size'] 
+    lr_rate = config[model_name]['lr_rate'] 
 
 
     kfold = StratifiedKFold(n_splits=5, shuffle=True)
-    train_df = pd.read_csv("/opt/ml/new_train_data_path_and_class.csv")
+    train_df = pd.read_csv("/opt/ml/path_and_label.csv")
     
     x_train = train_df['path'].to_numpy()
     y_train = train_df[target].to_numpy()
     
-
-    lr_rate = config[model_name]['lr_rate']
-    BATCH_SIZE = config[model_name]['batch_size']
-    cutmix = config[model_name]['cutmix'] # boolean
+    # /opt/ml/best_model
     path = '/' # checkpoint path
-   # ?
-    dir = config[model_name]['dir'] # 모델 별 이미지 경로
-
-    transform = transforms.Compose([
-        # ???
-    ])
+ 
+    transform_module = getattr(data_transform, config[model_name]["transform"])
+    transform = transform_module()
 
     model = get_model(model_name=model_name, num_classes=num_classes, device=device)
 
@@ -201,8 +199,8 @@ def main(config, model_name, checkpoint=False):
 
         train = MaskDataset(dir, x_train_fold, transform, target)
         test = MaskDataset(dir, x_test_fold, transform, target)
-        train_loader = DataLoader(train, batch_size = BATCH_SIZE, shuffle = False)
-        test_loader = DataLoader(test, batch_size = BATCH_SIZE, shuffle = False)
+        train_loader = DataLoader(train, batch_size = batch_size, shuffle = False)
+        test_loader = DataLoader(test, batch_size = batch_size, shuffle = False)
         
         # train
         model.train()
@@ -230,31 +228,25 @@ def main(config, model_name, checkpoint=False):
 if __name__ == '__main__':
     # argparser
     parser = argparse.ArgumentParser(description='PyTorch Template')
-    parser.add_argument('-bs', '--batch_size', type=int,
-                      help='Batch size for input/valid data(ex.1, 2, 4, ..,16, 32, ..)', required=True)
-    parser.add_argument('-cf', '--collate_fn', type=str,
-                      help='face_net_wrinkle_collate_fn', default=False)
-    parser.add_argument('-lr', '--learning_rate', type=float,
-                      help='Learning rate for training(ex.0.001)', required=True)
-    parser.add_argument('-ep', '--epochs', type=int,
-                      help='Number of iteration for total dataset(ex. 5, 10, ..)', required=True)
-    
-    parser.add_argument('-lm', '--load_model', type=str,
-                      help='Load model by file name (ex. 2021-08-23-4-23_bs-16_lr-0.0001', default=False)
-    # paser.arg.... 
+    parser.add_argument('--model', type=str, required=False)
+    # parser.add_argument('--lr_rate', type=float, required=False)
+    # parser.add_argument('--batch_size', type=int, required=False)
+    # parser.add_argument('--cutmix', type=bool, default=False)
+    # parser.add_argument('--dir', type=str, required=False)
+    # parser.add_argument('--num_classses', type=int, required=False)
+    # parser.add_argument('--target', type=str, required=False)
+    # parser.add_argument('--epochs', type=int, required=False)
 
     args = parser.parse_args()
 
-    # args update
+    model_name = args.model
     
 
-    with open('config.json', 'r') as jsonfile:
-        data = json.load(jsonfile)
     
     config = OmegaConf.load("config.json")
 
     if args.load_model:
         checkpoint = torch.load(f"/opt/ml/code/custom/best_model/{args.load_model}")
-        main(config, checkpoint)
+        main(config, model_name, checkpoint)
     else:
-        main(config)
+        main(config, model_name)
