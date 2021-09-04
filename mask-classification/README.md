@@ -9,11 +9,12 @@
 - classes: 18
 
 ## Performance
-- Public LB: 0.732
-- Private LB: 0.717
+- Public LB: F1 - 0.732, Accuracy - 78.936
+- Private LB: F1 - 0.717, Accuracy - 78.603
 
 ## Train
 - Train을 실행하기 전 utils의 facenet.py를 먼저 실행해야 한다. 이는 사진의 얼굴부분만 자른 사진을 new Images라는 폴더에 저장하도록 하였다.
+`python utils.facenet.py`
 `python train.py --model [model_name]` 
 
 ### models
@@ -115,7 +116,8 @@ if cutmix:
 
 ```
 ## Inference
-`python inference.py --mdoel [model_name] --fold [fold]`
+`python utils.facenet.py`
+`python inference.py --model [model_name] --fold [fold]`
 
 ### Ensemble
 학습된 EfficientNet, Resnet, VisionTransformer에 대해 각각 K-fold Ensemble을 진행한 뒤, 
