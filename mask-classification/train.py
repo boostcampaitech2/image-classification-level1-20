@@ -175,13 +175,13 @@ def main(config, model_name, checkpoint=False):
 
 
     kfold = StratifiedKFold(n_splits=5, shuffle=True)
-    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label.csv")
+    train_df = pd.read_csv("/opt/ml/image-classification-level1-20/mask-classification/path_and_label.csv")
     
     x_train = train_df['path'].to_numpy()
     y_train = train_df[target].to_numpy()
     
     # /opt/ml/best_model
-    path = '/opt/ml/team_github/image-classification-level1-20/mask-classification/model_saved' # checkpoint path
+    path = '/opt/ml/image-classification-level1-20/mask-classification/model_saved' # checkpoint path
  
     
 
@@ -249,7 +249,7 @@ if __name__ == '__main__':
     
 
     
-    config = OmegaConf.load("/opt/ml/team_github/image-classification-level1-20/mask-classification/config.json")
+    config = OmegaConf.load("/opt/ml/image-classification-level1-20/mask-classification/config.json")
 
     # if args.load_model:
     #     checkpoint = torch.load(f"/opt/ml/code/custom/best_model/{args.load_model}")
