@@ -16,9 +16,9 @@
 `python train.py --model [model_name]` 
 
 ### models
-- EfficientNet_b4
-- vit_tiny_patch16_224
-- resnet34 (mask, gender, age)
+- EfficientNet_b4 (model_name:  EfficientNet)
+- vit_tiny_patch16_224 (model_name:VIT)
+- resnet34 (mask, gender, age) (model_name:  ResNet_Mask, ResNet_Age, ResNet_Gedner)
 
 ### train augmentations
 개별 모델마다 input image에 대해 다른 augmentation을 적용함으로써 모델을 다양하게 사용하고자 하였다. 또한 상대적으로 성능이 잘 나오지 않은 ViT에 Cutmix를 이용해 데이터를 늘림으로써 모델의 성능을 높이고자 하였다.
@@ -114,7 +114,7 @@ if cutmix:
 
 ```
 ## Inference
-`python inference.py`
+`python inference.py --mdoel [model_name] --fold [fold]`
 
 ### Ensemble
 학습된 EfficientNet, Resnet, VisionTransformer에 대해 각각 K-fold Ensemble을 진행한 뒤, 
