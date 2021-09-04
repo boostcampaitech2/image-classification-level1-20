@@ -11,7 +11,6 @@ from timm.models.efficientnet import EfficientNet
 from tqdm import tqdm
 
 from torch import nn, optim
-from torchvision.models.resnet import resnet50
 from omegaconf import OmegaConf
 import torch
 import torchvision
@@ -23,7 +22,7 @@ from torch.cuda.amp import autocast_mode, grad_scaler
 from sklearn.metrics import f1_score
 
 from data_loader.dataset import MaskDataset
-from model.model import VIT, EfficientNet, resnet50
+from model.model import VIT, EfficientNet, ResNet_Mask,ResNet_Gender,ResNet_Age
 import data_transform
 
 def set_seed(random_seed):
@@ -176,7 +175,7 @@ def main(config, model_name, checkpoint=False):
 
 
     kfold = StratifiedKFold(n_splits=5, shuffle=True)
-    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label.csv")
+    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label2.csv")
     
     x_train = train_df['path'].to_numpy()
     y_train = train_df[target].to_numpy()

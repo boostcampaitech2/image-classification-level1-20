@@ -4,7 +4,7 @@ import pandas as pd
 def compress(csv_mask, csv_gender, csv_age):
     ret = csv_mask
     for i in range(1, 12601):
-        ret[i][1] = csv_mask[i][1] * 6 + csv_gender[i][1] * 3 + csv_age[i][1]
+        ret[i][1] = int(csv_mask[i][1]) * 6 + int(csv_gender[i][1]) * 3 + int(csv_age[i][1])
     return ret
 
 def conv(n):
@@ -17,7 +17,7 @@ def vote(p: list, data: list) -> int:
     mask = [0.] * 3
     gender = [0.] * 2
     age = [0.] * 3
-    for i in range(5):
+    for i in range(3):
         _mask, _gender, _age = conv(data[i])
         mask[_mask] += p[0][i]
         gender[_gender] += p[1][i]
@@ -29,8 +29,10 @@ def vote(p: list, data: list) -> int:
     return mask_label * 6 + gender_label * 3 + age_label
 
 if __name__ == "__main__":
-    path_in = ["", "", "", "", ""] # Efficient, VIT, Res_mask, Res_gender, Res_age
-    path_out = "" # output csv
+    path_in = ["/opt/ml/input/data/eval/submission_EfficientNet.csv",
+     "/opt/ml/input/data/eval/submission_VIT.csv", 
+    "/opt/ml/input/data/eval/submission_ResNet_Mask.csv", "/opt/ml/input/data/eval/submission_ResNet_Gender.csv", "/opt/ml/input/data/eval/submission_ResNet_Age.csv"] # Efficient, VIT, Res_mask, Res_gender, Res_age
+    path_out = "/opt/ml/input/data/eval/submission.csv"
 
     csv_data = [np.loadtxt(path, delimiter=',', dtype=str) for path in path_in]
     csv_data[2] = compress(csv_data[2], csv_data[3], csv_data[4])
