@@ -123,6 +123,8 @@ if cutmix:
 
 `python inference.py --model [model_name] --fold [fold]`
 
+`python ensemble.py`  
+
 ### Ensemble
 학습된 EfficientNet, Resnet, VisionTransformer에 대해 각각 K-fold Ensemble을 진행한 뒤, 
 
