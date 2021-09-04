@@ -175,7 +175,7 @@ def main(config, model_name, checkpoint=False):
 
 
     kfold = StratifiedKFold(n_splits=5, shuffle=True)
-    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label2.csv")
+    train_df = pd.read_csv("/opt/ml/team_github/image-classification-level1-20/mask-classification/path_and_label.csv")
     
     x_train = train_df['path'].to_numpy()
     y_train = train_df[target].to_numpy()
