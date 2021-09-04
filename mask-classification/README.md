@@ -2,6 +2,26 @@
 ## Install Requirements
 `pip install -r requirements.txt` 
 
+## Folder Structure
+
+```bash
+├── data_loader/ - load data
+│   └── dataset.py
+├── model/ - Efficientnet_b4, VIT, Resnet34
+│   └── model.py
+├── model_saved/ - saved model(.pt)
+│   └── ...
+├── utils/ - small utility functions
+│   └── facenet.py - face detection and crop
+├── path_and_label.csv - file path and label
+├── path_and_label_modified.csv - file path and label (modified mislabeled images)
+├── requirements.txt
+├── data_transform.py
+├── ensemble.py
+├── inference.py
+└── train.py
+```
+
 ## Data Description 
 - train images: 2700*7 = 18900
 - test images: 1800*7 = 12600
