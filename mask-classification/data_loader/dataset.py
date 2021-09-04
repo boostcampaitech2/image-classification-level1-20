@@ -57,8 +57,8 @@ class MaskDataset(Dataset):
         return X, y
 
 class TestMaskDataset(Dataset):
-    def __init__(self,im_dir_path, im_paths, transform):
-        self.im_paths=self.im_paths=os.path.join(im_dir_path,im_paths)
+    def __init__(self,im_dir_path, transform):
+        self.im_paths = im_dir_path
         self.shape =(3,512,384)
 
         self.test_transform = transform

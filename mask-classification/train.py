@@ -203,8 +203,8 @@ def main(config, model_name, checkpoint=False):
 
         train = MaskDataset(dir_, x_train_fold, transform, target)
         test = MaskDataset(dir_, x_test_fold, transform, target)
-        train_loader = DataLoader(train, batch_size = batch_size, shuffle = False)
-        test_loader = DataLoader(test, batch_size = batch_size, shuffle = False)
+        train_loader = DataLoader(train, batch_size = batch_size, shuffle = True)
+        test_loader = DataLoader(test, batch_size = batch_size, shuffle = True)
         
         # train
         
