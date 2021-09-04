@@ -13,6 +13,7 @@
 - Private LB: F1 - 0.717, Accuracy - 78.603
 
 ## Train
+
 - Train을 실행하기 전 utils의 facenet.py를 먼저 실행해야 한다. 이는 사진의 얼굴부분만 자른 사진을 new Images라는 폴더에 저장하도록 하였다.
 `python utils.facenet.py`
 `python train.py --model [model_name]` 
