@@ -15,6 +15,7 @@
 ## Train
 
 - Train을 실행하기 전 utils의 facenet.py를 먼저 실행해 사진의 얼굴부분만 자른 사진을 new Images 폴더에 저장하도록 하였다.    
+
 `python utils.facenet.py`  
 
 `python train.py --model [model_name]` 
