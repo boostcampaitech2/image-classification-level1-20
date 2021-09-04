@@ -38,7 +38,6 @@ class Efficient_transform:
     def __call__(self,X):
         return self.transform(X)
 ```
-
 ```python
 class ResNet_transform:
     def __init__(self):
@@ -51,7 +50,6 @@ class ResNet_transform:
     def __call__(self,X):
         return self.transform(X)
 ```
-
 ```python
 class VIT_transform:
     def __init__(self):
@@ -65,7 +63,6 @@ class VIT_transform:
     def __call__(self,X):
         return self.transform(X)
 ```
-
 ```python
 - Custom CutMix(All models)
 def rand_bbox(size, lam):
@@ -121,9 +118,14 @@ if cutmix:
 
 ### Ensemble
 학습된 EfficientNet, Resnet, VisionTransformer에 대해 각각 K-fold Ensemble을 진행한 뒤, 
+
+```python
 p = [
         [0.2, 0.2, 0.2], # mask
         [0.4, 0.15, 0.15], # gender
         [0.3, 0.3, 0.3] # age
-    ] 로 각 모델에서 mask, gender, age를 개별 가중치로 합산.
+    ]
+    
+```
+로 각 모델에서 mask, gender, age를 개별 가중치로 합산.
 
