@@ -166,3 +166,4 @@ widgetsnbextension @ file:///home/conda/feedstock_root/build_artifacts/widgetsnb
 zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1625284368454/work
 zope.event==4.5.0
 zope.interface==5.4.0
+retinaface==0.0.6
